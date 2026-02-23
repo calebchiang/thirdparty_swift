@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		0016682E2F4CDCBE005A3D41 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 0016682D2F4CDCBE005A3D41 /* KeychainAccess */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		0016680D2F4CDBB6005A3D41 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0016682E2F4CDCBE005A3D41 /* KeychainAccess in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +117,7 @@
 			);
 			name = thirdparty_ios;
 			packageProductDependencies = (
+				0016682D2F4CDCBE005A3D41 /* KeychainAccess */,
 			);
 			productName = thirdparty_ios;
 			productReference = 001667FF2F4CDBB2005A3D41 /* thirdparty_ios.app */;
@@ -195,6 +201,9 @@
 			);
 			mainGroup = 001667F62F4CDBB2005A3D41;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				0016682C2F4CDCBE005A3D41 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 001668002F4CDBB2005A3D41 /* Products */;
 			projectDirPath = "";
@@ -578,6 +587,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		0016682C2F4CDCBE005A3D41 /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kishikawakatsumi/KeychainAccess.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		0016682D2F4CDCBE005A3D41 /* KeychainAccess */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0016682C2F4CDCBE005A3D41 /* XCRemoteSwiftPackageReference "KeychainAccess" */;
+			productName = KeychainAccess;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 001667F72F4CDBB2005A3D41 /* Project object */;
 }
