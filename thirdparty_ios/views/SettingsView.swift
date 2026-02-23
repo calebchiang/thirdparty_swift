@@ -1,13 +1,8 @@
-//
-//  SettingsView.swift
-//  thirdparty_ios
-//
-//  Created by Caleb Chiang on 2026-02-23.
-//
-
 import SwiftUI
 
 struct SettingsView: View {
+    
+    @EnvironmentObject var auth: AuthViewModel
     
     var body: some View {
         ZStack {
@@ -38,11 +33,34 @@ struct SettingsView: View {
             }
             .ignoresSafeArea()
             
-            VStack {
-                Text("Settings View")
+            VStack(alignment: .leading, spacing: DesignSystem.Spacing.lg) {
+                
+                Text("Settings")
                     .font(DesignSystem.Typography.h2)
                     .foregroundColor(DesignSystem.Colors.textPrimary)
+                
+                Button {
+                    lightHaptic()
+                    auth.logout()
+                } label: {
+                    HStack {
+                        Image(systemName: "rectangle.portrait.and.arrow.right")
+                        Text("Logout")
+                    }
+                    .font(DesignSystem.Typography.bodyMedium)
+                    .foregroundColor(DesignSystem.Colors.error)
+                    .padding(.vertical, 12)
+                }
+                
+                Spacer()
             }
+            .padding(.top, DesignSystem.Spacing.xxl)
+            .padding(.horizontal, DesignSystem.Spacing.screenPadding)
         }
+    }
+    
+    private func lightHaptic() {
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.impactOccurred()
     }
 }
