@@ -66,9 +66,8 @@ struct AuthView: View {
                             )
                             .frame(width: 80, height: 80)
                             .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.xl))
-                            .modifier(DesignSystem.Shadows.glowGreen())
                             
-                            Image(systemName: "brain.head.profile")
+                            Image(systemName: "person.2")
                                 .font(.system(size: 40, weight: .bold))
                                 .foregroundColor(DesignSystem.Colors.textInverse)
                         }
@@ -153,7 +152,6 @@ struct AuthView: View {
                             .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.button))
                             .scaleEffect(buttonPressed ? DesignSystem.Animation.pressedScale : 1)
                             .animation(DesignSystem.Animation.fast, value: buttonPressed)
-                            .modifier(DesignSystem.Shadows.glowGreen())
                         }
                         .disabled(isLoading)
                         .simultaneousGesture(
@@ -178,22 +176,8 @@ struct AuthView: View {
                         }
                         .padding(.vertical, 4)
                         
-                        Button {
-                            lightHaptic()
-                        } label: {
-                            HStack(spacing: DesignSystem.Spacing.sm) {
-                                Image(systemName: "apple.logo")
-                                    .font(.system(size: 18, weight: .semibold))
-                                
-                                Text(isLoginMode ? "Log in with Apple" : "Sign up with Apple")
-                                    .font(DesignSystem.Typography.button)
-                            }
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 52)
-                            .background(Color.black)
-                            .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.button))
-                        }
+                        AppleSignInButtonView()
+                            .environmentObject(auth)
                         
                     }
                     .padding(DesignSystem.Spacing.cardPadding)
@@ -262,6 +246,7 @@ struct AuthView: View {
         }
         .onAppear {
             animateEntrance = true
+            AppleSignInCoordinator.shared.authViewModel = auth
         }
     }
     
