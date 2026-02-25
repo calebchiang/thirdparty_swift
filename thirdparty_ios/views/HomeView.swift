@@ -233,12 +233,12 @@ struct ModeCard: View {
                 
                 ZStack {
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(Color.white.opacity(0.2))
+                        .fill(Color.white.opacity(0.28))
                         .frame(width: 56, height: 56)
                     
                     Image(systemName: icon)
                         .font(.system(size: 24, weight: .bold))
-                        .foregroundColor(DesignSystem.Colors.textPrimary)
+                        .foregroundColor(.black)
                 }
                 
                 VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
@@ -256,12 +256,12 @@ struct ModeCard: View {
                 
                 ZStack {
                     Circle()
-                        .fill(Color.black.opacity(0.2))
+                        .fill(Color.white.opacity(0.30))
                         .frame(width: 40, height: 40)
                     
                     Image(systemName: "arrow.right")
                         .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(DesignSystem.Colors.textPrimary)
+                        .foregroundColor(.black)
                 }
             }
             .padding(DesignSystem.Spacing.cardPadding)

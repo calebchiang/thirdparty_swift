@@ -14,37 +14,11 @@ enum SetupMode: Identifiable {
     }
 }
 
-enum Persona: String, CaseIterable {
-    case mediator
-    case judgeJudy
-    case comedian
-    
-    var title: String {
-        switch self {
-        case .mediator: return "The Mediator"
-        case .judgeJudy: return "Judge Judy"
-        case .comedian: return "The Comedian"
-        }
-    }
-    
-    var description: String {
-        switch self {
-        case .mediator:
-            return "Fair, diplomatic, and balanced."
-        case .judgeJudy:
-            return "Direct, no-nonsense, brutally honest."
-        case .comedian:
-            return "Witty and humorous but still decisive."
-        }
-    }
-    
-    var icon: String {
-        switch self {
-        case .mediator: return "face.smiling"
-        case .judgeJudy: return "bolt.shield.fill"
-        case .comedian: return "theatermasks.fill"
-        }
-    }
+struct LiveSession: Identifiable, Hashable {
+    let id = UUID()
+    let personA: String
+    let personB: String
+    let persona: Persona
 }
 
 struct SetupView: View {
@@ -57,6 +31,7 @@ struct SetupView: View {
     @State private var selectedPersona: Persona = .mediator
     @State private var animateJudges: Bool = false
     @State private var buttonPressed: Bool = false
+    @State private var liveSession: LiveSession?
     
     @FocusState private var focusedField: Field?
     
@@ -87,6 +62,20 @@ struct SetupView: View {
     }
     
     var body: some View {
+        NavigationStack {
+            content
+                .navigationBarHidden(true)
+                .navigationDestination(item: $liveSession) { session in
+                    LiveModeView(
+                        personAName: session.personA,
+                        personBName: session.personB,
+                        persona: session.persona
+                    )
+                }
+        }
+    }
+    
+    private var content: some View {
         ZStack {
             
             LinearGradient(
@@ -106,10 +95,8 @@ struct SetupView: View {
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: DesignSystem.Spacing.xl) {
-                        
                         participantsSection
                         judgesSection
-                        
                         Spacer(minLength: 40)
                     }
                     .padding(.horizontal, DesignSystem.Spacing.screenPadding)
@@ -120,7 +107,10 @@ struct SetupView: View {
             }
         }
         .onAppear {
-            animateJudges = true
+            animateJudges = false
+            DispatchQueue.main.async {
+                animateJudges = true
+            }
         }
     }
     
@@ -231,11 +221,19 @@ struct SetupView: View {
             
             Button {
                 mediumHaptic()
+                
+                if mode == .live {
+                    liveSession = LiveSession(
+                        personA: personAName,
+                        personB: personBName,
+                        persona: selectedPersona
+                    )
+                }
+                
             } label: {
                 HStack {
                     Text(ctaText)
                         .font(.system(size: 16, weight: .semibold))
-                    
                     Image(systemName: "arrow.right")
                 }
                 .foregroundColor(canProceed ? .white : DesignSystem.Colors.textMuted)
@@ -369,13 +367,11 @@ struct SetupView: View {
     // MARK: Haptics
     
     private func lightHaptic() {
-        let generator = UIImpactFeedbackGenerator(style: .light)
-        generator.impactOccurred()
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
     }
     
     private func mediumHaptic() {
-        let generator = UIImpactFeedbackGenerator(style: .medium)
-        generator.impactOccurred()
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
     }
 }
 
