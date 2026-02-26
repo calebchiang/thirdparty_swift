@@ -15,7 +15,9 @@ struct LiveModeView: View {
     @State private var transcript: String = ""
     @State private var timer: Timer?
     @State private var pulse = false
-    @State private var isUploading = false
+    
+    @State private var recordedAudioURL: URL?
+    @State private var goToProcessing = false
     
     var body: some View {
         ZStack {
@@ -67,6 +69,16 @@ struct LiveModeView: View {
             }
         }
         .navigationBarHidden(true)
+        .navigationDestination(isPresented: $goToProcessing) {
+            if let url = recordedAudioURL {
+                ProcessingView(
+                    personAName: personAName,
+                    personBName: personBName,
+                    persona: persona,
+                    audioURL: url
+                )
+            }
+        }
     }
 }
 
@@ -143,7 +155,7 @@ private extension LiveModeView {
                     Circle()
                         .fill(DesignSystem.Colors.error.opacity(0.4))
                         .frame(width: 130, height: 130)
-                        .offset(y: 50)
+                        .offset(y: 30)
                     
                     ZStack {
                         Circle().fill(DesignSystem.Colors.error.opacity(0.1)).frame(width: 90, height: 90)
@@ -204,20 +216,9 @@ private extension LiveModeView {
                             .stroke(DesignSystem.Colors.border)
                     )
                 
-                if isUploading {
-                    ProgressView("Transcribing conversation...")
-                        .foregroundColor(DesignSystem.Colors.textPrimary)
-                } else if transcript.isEmpty {
-                    Text("Transcript will appear here...")
-                        .foregroundColor(DesignSystem.Colors.textMuted)
-                        .italic()
-                } else {
-                    ScrollView {
-                        Text(transcript)
-                            .foregroundColor(DesignSystem.Colors.textPrimary)
-                            .padding()
-                    }
-                }
+                Text("Transcript will appear here...")
+                    .foregroundColor(DesignSystem.Colors.textMuted)
+                    .italic()
             }
             .frame(height: 160)
         }
@@ -262,7 +263,8 @@ private extension LiveModeView {
                 withAnimation { isRecording = false }
                 
                 if let url = url {
-                    uploadArgument(audioURL: url)
+                    recordedAudioURL = url
+                    goToProcessing = true
                 }
                 
             } else {
@@ -284,38 +286,4 @@ private extension LiveModeView {
             }
         }
     }
-    
-    func uploadArgument(audioURL: URL) {
-        isUploading = true
-        transcript = ""
-        
-        RequestManager.shared.uploadArgument(
-            personAName: personAName,
-            personBName: personBName,
-            persona: persona.backendValue,
-            audioURL: audioURL
-        ) { result in
-            
-            isUploading = false
-            
-            switch result {
-            case .success(let argument):
-                transcript = argument.transcription
-            case .failure(let error):
-                print("Upload failed:", error)
-                transcript = "Failed to analyze conversation."
-            }
-        }
-    }
-}
-
-struct ArgumentResponse: Decodable {
-    let id: Int
-    let user_id: Int
-    let person_a_name: String
-    let person_b_name: String
-    let transcription: String
-    let language: String?
-    let duration: Double?
-    let created_at: String
 }

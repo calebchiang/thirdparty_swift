@@ -44,24 +44,36 @@ final class RequestManager {
             request.httpBody = try? JSONSerialization.data(withJSONObject: body)
         }
         
-        URLSession.shared.dataTask(with: request) { data, _, error in
+        URLSession.shared.dataTask(with: request) { data, response, error in
             
             DispatchQueue.main.async {
                 
                 if let error = error {
+                    print("❌ Network error:", error)
                     completion(.failure(error))
                     return
                 }
                 
                 guard let data = data else {
+                    print("❌ No data received")
                     completion(.failure(APIError.noData))
                     return
                 }
                 
+                // 🔥 PRINT RAW BACKEND RESPONSE
+                if let rawString = String(data: data, encoding: .utf8) {
+                    print("====================================")
+                    print("🔥 RAW BACKEND RESPONSE for \(endpoint)")
+                    print(rawString)
+                    print("====================================")
+                }
+                
                 do {
                     let decoded = try JSONDecoder().decode(T.self, from: data)
+                    print("✅ Decoding succeeded")
                     completion(.success(decoded))
                 } catch {
+                    print("❌ Decoding failed:", error)
                     completion(.failure(error))
                 }
             }
