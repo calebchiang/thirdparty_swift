@@ -202,7 +202,6 @@ private extension HistoryView {
         
         return VStack(spacing: 0) {
             
-            // Accent line
             if let winnerColor {
                 Rectangle()
                     .fill(winnerColor)
@@ -211,7 +210,7 @@ private extension HistoryView {
             
             VStack(alignment: .leading, spacing: 12) {
                 
-                // Header row
+                // Header row (Names + Date)
                 HStack(alignment: .top) {
                     
                     HStack(spacing: 6) {
@@ -238,11 +237,11 @@ private extension HistoryView {
                     
                     Spacer()
                     
-                    Image(systemName: "chevron.right")
+                    Text(formattedDate(from: argument.createdAt))
+                        .font(.system(size: 12, weight: .semibold))
                         .foregroundColor(DesignSystem.Colors.textMuted)
                 }
                 
-                // Verdict Badge
                 if let judgment = argument.judgment {
                     HStack {
                         Image(systemName: "trophy.fill")
@@ -259,52 +258,37 @@ private extension HistoryView {
                     }
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
-                    .background(
-                        winnerColor?.opacity(0.15)
-                    )
+                    .background(winnerColor?.opacity(0.15))
                     .cornerRadius(DesignSystem.Radius.sm)
                 }
-                else {
-                    HStack(spacing: 6) {
-                        Circle()
-                            .fill(Color.yellow)
-                            .frame(width: 6, height: 6)
-                        Text("Judging...")
-                            .font(DesignSystem.Typography.caption)
-                            .foregroundColor(DesignSystem.Colors.textMuted)
-                    }
-                }
                 
-                // Divider
                 Rectangle()
                     .fill(DesignSystem.Colors.divider)
                     .frame(height: 1)
                 
-                // Footer row
+                // Footer row (Health left, Chevron right)
                 HStack {
                     
-                    // Persona badge
-                    HStack(spacing: 6) {
-                        Image(systemName: "person.2.fill")
-                            .font(.system(size: 12))
-                            .foregroundColor(DesignSystem.Colors.textMuted)
-                        
-                        Text(argument.persona.capitalized)
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(DesignSystem.Colors.textMuted)
+                    if let health = argument.judgment?.conversationHealthScore {
+                        HStack(spacing: 6) {
+                            Image(systemName: "heart.fill")
+                                .font(.system(size: 12))
+                                .foregroundColor(DesignSystem.Colors.textSecondary)
+                            
+                            Text("\(health)%")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(DesignSystem.Colors.textPrimary)
+                        }
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(DesignSystem.Colors.bgTertiary)
+                        .cornerRadius(DesignSystem.Radius.sm)
                     }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(DesignSystem.Colors.bgTertiary)
-                    .cornerRadius(DesignSystem.Radius.sm)
                     
                     Spacer()
                     
-                    if let health = argument.judgment?.conversationHealthScore {
-                        Text("Health: \(health)")
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(DesignSystem.Colors.textMuted)
-                    }
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(DesignSystem.Colors.textMuted)
                 }
             }
             .padding(DesignSystem.Spacing.cardPadding)
@@ -318,16 +302,38 @@ private extension HistoryView {
         .modifier(DesignSystem.Shadows.lg())
     }
     
+    func formattedDate(from string: String) -> String {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [
+            .withInternetDateTime,
+            .withFractionalSeconds
+        ]
+        
+        guard let date = formatter.date(from: string) else {
+            return ""
+        }
+        
+        let calendar = Calendar.current
+        
+        if calendar.isDateInToday(date) {
+            return "Today"
+        }
+        
+        if calendar.isDateInYesterday(date) {
+            return "Yesterday"
+        }
+        
+        let displayFormatter = DateFormatter()
+        displayFormatter.dateFormat = "MMMM d, yyyy"
+        return displayFormatter.string(from: date)
+    }
+    
     func winnerName(for winner: String, argument: HistoryArgumentResponse) -> String {
         switch winner {
-        case "person_a":
-            return argument.personAName
-        case "person_b":
-            return argument.personBName
-        case "tie":
-            return "Tie"
-        default:
-            return winner
+        case "person_a": return argument.personAName
+        case "person_b": return argument.personBName
+        case "tie": return "Tie"
+        default: return winner
         }
     }
 }
