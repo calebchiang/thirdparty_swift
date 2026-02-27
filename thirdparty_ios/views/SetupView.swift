@@ -32,6 +32,9 @@ struct SetupView: View {
     @State private var animateJudges: Bool = false
     @State private var buttonPressed: Bool = false
     @State private var liveSession: LiveSession?
+    @State private var uploadSession: LiveSession?
+    
+    let onFlowComplete: () -> Void
     
     @FocusState private var focusedField: Field?
     
@@ -69,7 +72,16 @@ struct SetupView: View {
                     LiveModeView(
                         personAName: session.personA,
                         personBName: session.personB,
-                        persona: session.persona
+                        persona: session.persona,
+                        onFlowComplete: onFlowComplete
+                    )
+                }
+                .navigationDestination(item: $uploadSession) { session in
+                    UploadModeView(
+                        personAName: session.personA,
+                        personBName: session.personB,
+                        persona: session.persona,
+                        onFlowComplete: onFlowComplete
                     )
                 }
         }
@@ -228,6 +240,12 @@ struct SetupView: View {
                         personB: personBName,
                         persona: selectedPersona
                     )
+                } else if mode == .upload {
+                    uploadSession = LiveSession(
+                        personA: personAName,
+                        personB: personBName,
+                        persona: selectedPersona
+                    )
                 }
                 
             } label: {
@@ -376,5 +394,8 @@ struct SetupView: View {
 }
 
 #Preview {
-    SetupView(mode: .live)
+    SetupView(
+        mode: .live,
+        onFlowComplete: {}
+    )
 }

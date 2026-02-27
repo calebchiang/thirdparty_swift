@@ -5,11 +5,16 @@ struct ExpandedHistoryView: View {
     
     let argument: HistoryArgumentResponse
     let judgment: HistoryJudgmentResponse
+    let onDelete: () -> Void
     
     @State private var animateIn = false
     @State private var animateDonut = false
     @State private var isTranscriptExpanded = false
     @State private var isReasoningExpanded = false
+    
+    @State private var showDeleteAlert = false
+    @State private var isDeleting = false
+    @State private var deleteError: String?
     
     @Environment(\.dismiss) private var dismiss
     
@@ -76,7 +81,7 @@ struct ExpandedHistoryView: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
                     lightHaptic()
-                    // TODO: delete logic
+                    showDeleteAlert = true
                 } label: {
                     Image(systemName: "trash")
                         .font(.system(size: 14, weight: .bold))
@@ -84,6 +89,17 @@ struct ExpandedHistoryView: View {
                         .frame(width: 34, height: 34)
                 }
             }
+        }
+        .alert("Delete Case?", isPresented: $showDeleteAlert) {
+            
+            Button("Cancel", role: .cancel) { }
+            
+            Button("Delete", role: .destructive) {
+                deleteArgument()
+            }
+            
+        } message: {
+            Text("If you delete this case, all data including transcript and judgment will be permanently lost.")
         }
         .onAppear {
             withAnimation(DesignSystem.Animation.dramatic) {
@@ -444,4 +460,37 @@ private extension ExpandedHistoryView {
             }
         }
     }
+    
+    func deleteArgument() {
+        
+        guard !isDeleting else { return }
+        
+        isDeleting = true
+        deleteError = nil
+        
+        RequestManager.shared.sendRequest(
+            endpoint: "/arguments/\(argument.id)",
+            method: "DELETE",
+            responseType: EmptyResponse.self
+        ) { result in
+            
+            isDeleting = false
+            
+            switch result {
+            case .success:
+                lightHaptic()
+                
+                // Instantly update parent list
+                onDelete()
+                
+                // Dismiss back
+                dismiss()
+                
+            case .failure:
+                deleteError = "Failed to delete case."
+            }
+        }
+    }
 }
+
+struct EmptyResponse: Decodable {}

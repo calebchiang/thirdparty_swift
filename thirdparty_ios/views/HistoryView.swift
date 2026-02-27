@@ -62,6 +62,7 @@ struct HistoryView: View {
     @State private var arguments: [HistoryArgumentResponse] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @State private var animateCards = false
     
     func lightHaptic() {
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
@@ -128,17 +129,29 @@ private extension HistoryView {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: DesignSystem.Spacing.md) {
                         
-                        ForEach(arguments) { argument in
+                        ForEach(Array(arguments.enumerated()), id: \.element.id) { index, argument in
                             
                             if let judgment = argument.judgment {
                                 
                                 NavigationLink {
                                     ExpandedHistoryView(
                                         argument: argument,
-                                        judgment: judgment
+                                        judgment: judgment,
+                                        onDelete: {
+                                                   withAnimation(.easeInOut) {
+                                                       arguments.removeAll { $0.id == argument.id }
+                                                   }
+                                               }
                                     )
                                 } label: {
                                     historyCard(argument)
+                                        .opacity(animateCards ? 1 : 0)
+                                        .offset(y: animateCards ? 0 : 20)
+                                        .animation(
+                                            .easeOut(duration: 0.5)
+                                                .delay(Double(index) * 0.05),
+                                            value: animateCards
+                                        )
                                 }
                                 .buttonStyle(.plain)
                                 .simultaneousGesture(
@@ -299,7 +312,6 @@ private extension HistoryView {
                 .stroke(DesignSystem.Colors.border, lineWidth: 1)
         )
         .cornerRadius(DesignSystem.Radius.xl)
-        .modifier(DesignSystem.Shadows.lg())
     }
     
     func formattedDate(from string: String) -> String {
@@ -345,13 +357,13 @@ private extension HistoryView {
     var glowOrbs: some View {
         ZStack {
             Circle()
-                .fill(DesignSystem.Colors.primary.opacity(0.06))
+                .fill(DesignSystem.Colors.primary.opacity(0.2))
                 .frame(width: 250, height: 250)
                 .blur(radius: 120)
                 .offset(x: 120, y: -120)
             
             Circle()
-                .fill(DesignSystem.Colors.secondary.opacity(0.06))
+                .fill(DesignSystem.Colors.secondary.opacity(0.2))
                 .frame(width: 250, height: 250)
                 .blur(radius: 120)
                 .offset(x: -120, y: 200)
@@ -379,6 +391,14 @@ private extension HistoryView {
             switch result {
             case .success(let data):
                 arguments = data
+                
+                animateCards = false
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    withAnimation(.easeOut(duration: 0.6)) {
+                        animateCards = true
+                    }
+                }
             case .failure:
                 errorMessage = "Failed to load history."
             }

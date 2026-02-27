@@ -6,6 +6,7 @@ struct JudgmentView: View {
     let judgment: JudgmentResponse
     let personAName: String
     let personBName: String
+    let onDone: () -> Void
     
     @State private var animateIn = false
     @State private var animateDonut = false
@@ -43,14 +44,9 @@ struct JudgmentView: View {
                         .padding(.bottom, DesignSystem.Spacing.xxl)
                     }
                 }
-                
-                brandingSection
-                    .padding(.horizontal, DesignSystem.Spacing.screenPadding)
-                    .padding(.top, 4)
-                    .padding(.bottom, DesignSystem.Spacing.sm)
-                    .background(DesignSystem.Colors.bgPrimary)
-                
+          
                 bottomActions
+                    .padding(.top, 8)
                     .padding(.horizontal, DesignSystem.Spacing.screenPadding)
                     .padding(.bottom, DesignSystem.Spacing.lg)
             }
@@ -285,16 +281,6 @@ private extension JudgmentView {
         }
     }
     
-    var brandingSection: some View {
-        HStack(spacing: DesignSystem.Spacing.md) {
-            Rectangle().fill(DesignSystem.Colors.divider).frame(height: 1)
-            Text("Settled with ThirdParty")
-                .font(DesignSystem.Typography.caption)
-                .foregroundColor(DesignSystem.Colors.textMuted)
-            Rectangle().fill(DesignSystem.Colors.divider).frame(height: 1)
-        }
-    }
-    
     var bottomActions: some View {
         HStack(spacing: DesignSystem.Spacing.md) {
             
@@ -312,7 +298,10 @@ private extension JudgmentView {
                     .clipShape(RoundedRectangle(cornerRadius: 14))
             }
             
-            Button(action: { lightHaptic() }) {
+            Button(action: {
+                lightHaptic()
+                onDone()
+            }) {
                 Text("Done")
                     .font(DesignSystem.Typography.button)
                     .frame(maxWidth: .infinity, minHeight: 52)

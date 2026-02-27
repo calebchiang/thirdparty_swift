@@ -6,6 +6,7 @@ struct ProcessingView: View {
     let personBName: String
     let persona: Persona
     let audioURL: URL
+    let onFlowComplete: () -> Void
     
     @State private var argumentId: Int?
     
@@ -52,6 +53,9 @@ struct ProcessingView: View {
                 errorView(message: errorMessage)
             } else {
                 contentView
+                    .transaction { transaction in
+                                transaction.animation = nil
+                            }
             }
         }
         .onAppear {
@@ -69,7 +73,8 @@ struct ProcessingView: View {
                 JudgmentView(
                     judgment: judgment,
                     personAName: personAName,
-                    personBName: personBName
+                    personBName: personBName,
+                    onDone: onFlowComplete 
                 )
             }
         }

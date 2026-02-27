@@ -412,6 +412,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = ThirdParty;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app needs microphone access to record live conversations.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "We need access to your photo library to upload video recordings of conversations.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -447,6 +448,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = ThirdParty;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app needs microphone access to record live conversations.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "We need access to your photo library to upload video recordings of conversations.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

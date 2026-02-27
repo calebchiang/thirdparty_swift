@@ -168,7 +168,12 @@ struct HomeView: View {
             }
         }
         .fullScreenCover(item: $selectedMode) { mode in
-            SetupView(mode: mode)
+            SetupView(
+                mode: mode,
+                onFlowComplete: {
+                           selectedMode = nil   
+                       }
+            )
         }
         .alert(
             "Credits",

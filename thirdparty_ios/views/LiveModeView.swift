@@ -7,6 +7,7 @@ struct LiveModeView: View {
     let personAName: String
     let personBName: String
     let persona: Persona
+    let onFlowComplete: () -> Void
     
     @Environment(\.dismiss) private var dismiss
     
@@ -75,7 +76,8 @@ struct LiveModeView: View {
                     personAName: personAName,
                     personBName: personBName,
                     persona: persona,
-                    audioURL: url
+                    audioURL: url,
+                    onFlowComplete: onFlowComplete  
                 )
             }
         }
