@@ -7,6 +7,7 @@
 
 import Foundation
 import KeychainAccess
+import UIKit
 
 final class RequestManager {
     
@@ -165,4 +166,95 @@ final class RequestManager {
             
         }.resume()
     }
+    
+    func uploadScreenshots(
+        personAName: String,
+        personBName: String,
+        persona: String,
+        images: [UIImage],
+        completion: @escaping (Result<ScreenshotArgumentResponse, Error>) -> Void
+    ) {
+        guard let token = try? keychain.get("authToken") else {
+            completion(.failure(APIError.missingToken))
+            return
+        }
+        
+        guard let url = URL(string: "/arguments/screenshot", relativeTo: baseURL) else {
+            completion(.failure(APIError.invalidURL))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        let boundary = UUID().uuidString
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        
+        var body = Data()
+        
+        func appendField(name: String, value: String) {
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"\(name)\"\r\n\r\n".data(using: .utf8)!)
+            body.append("\(value)\r\n".data(using: .utf8)!)
+        }
+        
+        appendField(name: "person_a_name", value: personAName)
+        appendField(name: "person_b_name", value: personBName)
+        appendField(name: "persona", value: persona)
+        
+        for (index, image) in images.enumerated() {
+            guard let imageData = image.jpegData(compressionQuality: 0.9) else { continue }
+            
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"screenshots\"; filename=\"screenshot\(index).jpg\"\r\n".data(using: .utf8)!)
+            body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
+            body.append(imageData)
+            body.append("\r\n".data(using: .utf8)!)
+        }
+        
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+        request.httpBody = body
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            
+            DispatchQueue.main.async {
+                
+                if let error = error {
+                    completion(.failure(error))
+                    return
+                }
+                
+                guard let data = data else {
+                    completion(.failure(APIError.noData))
+                    return
+                }
+                
+                // 🔥 Debug print
+                print("====================================")
+                print("🔥 SCREENSHOT BACKEND RESPONSE")
+                print(String(data: data, encoding: .utf8) ?? "")
+                print("====================================")
+                
+                do {
+                    let decoded = try JSONDecoder().decode(ScreenshotArgumentResponse.self, from: data)
+                    completion(.success(decoded))
+                } catch {
+                    completion(.failure(error))
+                }
+            }
+            
+        }.resume()
+    }
+}
+
+struct ScreenshotArgumentResponse: Decodable {
+    let id: Int
+    let user_id: Int
+    let person_a_name: String
+    let person_b_name: String
+    let persona: String
+    let status: String
+    let created_at: String
+    let judgment: JudgmentResponse?
 }

@@ -33,6 +33,7 @@ struct SetupView: View {
     @State private var buttonPressed: Bool = false
     @State private var liveSession: LiveSession?
     @State private var uploadSession: LiveSession?
+    @State private var screenshotSession: LiveSession?
     
     let onFlowComplete: () -> Void
     
@@ -78,6 +79,14 @@ struct SetupView: View {
                 }
                 .navigationDestination(item: $uploadSession) { session in
                     UploadModeView(
+                        personAName: session.personA,
+                        personBName: session.personB,
+                        persona: session.persona,
+                        onFlowComplete: onFlowComplete
+                    )
+                }
+                .navigationDestination(item: $screenshotSession) { session in
+                    ScreenshotModeView(
                         personAName: session.personA,
                         personBName: session.personB,
                         persona: session.persona,
@@ -246,8 +255,13 @@ struct SetupView: View {
                         personB: personBName,
                         persona: selectedPersona
                     )
+                } else if mode == .screenshot {
+                    screenshotSession = LiveSession(
+                        personA: personAName,
+                        personB: personBName,
+                        persona: selectedPersona
+                    )
                 }
-                
             } label: {
                 HStack {
                     Text(ctaText)

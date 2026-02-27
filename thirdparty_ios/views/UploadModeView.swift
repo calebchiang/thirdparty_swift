@@ -223,6 +223,20 @@ private extension UploadModeView {
                 RoundedRectangle(cornerRadius: DesignSystem.Radius.xl)
                     .fill(DesignSystem.Colors.bgCard)
             )
+            .overlay(
+                RoundedRectangle(cornerRadius: DesignSystem.Radius.xl)
+                    .stroke(
+                        hasSelectedFile
+                        ? DesignSystem.Colors.border
+                        : DesignSystem.Colors.borderLight,
+                        style: hasSelectedFile
+                        ? StrokeStyle(lineWidth: 1)
+                        : StrokeStyle(
+                            lineWidth: 2,
+                            dash: [6, 6]
+                          )
+                    )
+            )
         }
         .buttonStyle(.plain)
         .padding(.horizontal, DesignSystem.Spacing.screenPadding)

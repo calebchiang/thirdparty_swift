@@ -45,8 +45,11 @@ struct ExpandedHistoryView: View {
                             .id("healthBreakdown")
                         
                         reasoningSection
-                        transcriptionSection
-                        
+                        if !argument.transcription
+                            .trimmingCharacters(in: .whitespacesAndNewlines)
+                            .isEmpty {
+                            transcriptionSection
+                        }
                     }
                     .padding(.horizontal, DesignSystem.Spacing.screenPadding)
                     .padding(.top, DesignSystem.Spacing.xl)
