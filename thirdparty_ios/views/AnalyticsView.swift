@@ -12,6 +12,8 @@ struct AnalyticsView: View {
     var body: some View {
         ZStack {
             
+            // MARK: - Background
+            
             LinearGradient(
                 colors: [
                     DesignSystem.Colors.bgPrimary,
@@ -22,6 +24,8 @@ struct AnalyticsView: View {
                 endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
+            
+            // Glow Orbs
             
             ZStack {
                 Circle()
@@ -38,11 +42,60 @@ struct AnalyticsView: View {
             }
             .ignoresSafeArea()
             
-            VStack {
-                Text("Analytics View")
-                    .font(DesignSystem.Typography.h2)
-                    .foregroundColor(DesignSystem.Colors.textPrimary)
+            // MARK: - Content
+            
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: DesignSystem.Spacing.xl) {
+                    
+                    // MARK: - HEADER
+                    
+                    VStack(alignment: .leading, spacing: DesignSystem.Spacing.sm) {
+                        
+                        Text("INSIGHTS")
+                            .font(DesignSystem.Typography.caption)
+                            .foregroundColor(DesignSystem.Colors.primary)
+                            .tracking(2)
+                        
+                        Text("Analytics")
+                            .font(DesignSystem.Typography.h1)
+                            .foregroundColor(DesignSystem.Colors.textPrimary)
+                    }
+                    .padding(.top, DesignSystem.Spacing.lg)
+                    
+                    Divider()
+                        .background(DesignSystem.Colors.border)
+                    
+                    // MARK: - Coming Soon
+                    
+                    VStack(spacing: DesignSystem.Spacing.lg) {
+                        
+                        Image(systemName: "chart.bar.xaxis")
+                            .font(.system(size: 60, weight: .semibold))
+                            .foregroundColor(DesignSystem.Colors.primary.opacity(0.8))
+                        
+                        Text("Advanced Analytics Coming Soon")
+                            .font(DesignSystem.Typography.h2)
+                            .foregroundColor(DesignSystem.Colors.textPrimary)
+                            .multilineTextAlignment(.center)
+                        
+                        Text("We’re building powerful insights to help you understand communication patterns, emotional balance, and relationship trends.")
+                            .font(DesignSystem.Typography.body)
+                            .foregroundColor(DesignSystem.Colors.textSecondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, DesignSystem.Spacing.lg)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, DesignSystem.Spacing.xxl)
+                    
+                    Spacer(minLength: DesignSystem.Spacing.xxl)
+                }
+                .padding(.horizontal, DesignSystem.Spacing.screenPadding)
+                .padding(.bottom, DesignSystem.Spacing.xxl)
             }
         }
     }
+}
+
+#Preview {
+    AnalyticsView()
 }

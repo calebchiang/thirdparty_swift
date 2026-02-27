@@ -44,7 +44,7 @@ struct MainTabView: View {
                 .tag(Tab.settings)
         }
         .tint(DesignSystem.Colors.primaryLight)
-        .onChange(of: selectedTab) { _ in
+        .onChange(of: selectedTab) {
             lightHaptic()
         }
     }

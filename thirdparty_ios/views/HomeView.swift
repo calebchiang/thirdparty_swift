@@ -11,6 +11,7 @@ struct HomeView: View {
     
     @State private var selectedMode: SetupMode?
     @State private var showCreditsAlert = false
+    @State private var showPaywall = false
     
     private func lightHaptic() {
         let generator = UIImpactFeedbackGenerator(style: .light)
@@ -133,6 +134,7 @@ struct HomeView: View {
                             
                             Button {
                                 lightHaptic()
+                                showPaywall = true
                             } label: {
                                 HStack(spacing: 6) {
                                     Text("Go Pro")
@@ -174,6 +176,11 @@ struct HomeView: View {
                            selectedMode = nil   
                        }
             )
+        }
+        .fullScreenCover(isPresented: $showPaywall) {
+            PaywallView {
+                showPaywall = false
+            }
         }
         .alert(
             "Credits",

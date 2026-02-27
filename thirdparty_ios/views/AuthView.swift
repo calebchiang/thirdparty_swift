@@ -114,8 +114,7 @@ struct AuthView: View {
                                 ? "Don't have an account? Sign Up"
                                 : "Already have an account? Login"
                             )
-                            .font(DesignSystem.Typography.body)
-                            .foregroundColor(DesignSystem.Colors.textSecondary)
+                            .font(.system(size: 14, weight: .medium))                          .foregroundColor(DesignSystem.Colors.textSecondary)
                         }
                         
                         Button {
