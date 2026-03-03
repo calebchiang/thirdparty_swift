@@ -5,6 +5,7 @@
 
 import SwiftUI
 import UIKit
+import RevenueCat
 
 struct PaywallView: View {
     
@@ -12,9 +13,15 @@ struct PaywallView: View {
     
     @State private var selectedPlan: Plan = .yearly
     @State private var animateHeader = false
-    @State private var showFeature1 = false
-    @State private var showFeature2 = false
-    @State private var showFeature3 = false
+    
+    @State private var offerings: Offerings?
+    @State private var monthlyPackage: Package?
+    @State private var yearlyPackage: Package?
+    @State private var isLoading = true
+    
+    @State private var isPurchasing = false
+    @State private var purchaseErrorMessage: String?
+    @State private var showPurchaseError = false
     
     private let lightHaptic = UIImpactFeedbackGenerator(style: .light)
     
@@ -23,10 +30,38 @@ struct PaywallView: View {
         case yearly
     }
     
+    private var disclaimerText: String {
+        if selectedPlan == .yearly {
+            let price = yearlyPackage?.storeProduct.localizedPriceString ?? ""
+            return "\(price) today, then billed annually. Auto-renews unless cancelled."
+        } else {
+            let price = monthlyPackage?.storeProduct.localizedPriceString ?? ""
+            return "\(price) today, then billed monthly. Auto-renews unless cancelled."
+        }
+    }
+    
+    private var calculatedAnnualOriginalPrice: String? {
+        guard
+            let monthly = monthlyPackage?.storeProduct,
+            let yearly = yearlyPackage?.storeProduct
+        else { return nil }
+        
+        let monthlyDecimal = monthly.price as Decimal
+        let yearlyFull = monthlyDecimal * 12
+        
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.locale = monthly.priceFormatter?.locale
+        
+        return formatter.string(from: yearlyFull as NSDecimalNumber)
+    }
+    
+    private var selectedPackage: Package? {
+        selectedPlan == .yearly ? yearlyPackage : monthlyPackage
+    }
+    
     var body: some View {
-        ZStack(alignment: .bottom) {
-            
-            // MARK: - Background
+        ZStack {
             
             LinearGradient(
                 colors: [
@@ -54,14 +89,10 @@ struct PaywallView: View {
             }
             .ignoresSafeArea()
             
-            // MARK: - Content
-            
             ScrollView(showsIndicators: false) {
                 VStack(spacing: DesignSystem.Spacing.lg) {
                     
                     Spacer(minLength: 10)
-                    
-                    // MARK: - Close
                     
                     HStack {
                         Spacer()
@@ -77,8 +108,6 @@ struct PaywallView: View {
                                 .clipShape(Circle())
                         }
                     }
-                    
-                    // MARK: - Header
                     
                     VStack(spacing: 16) {
                         ZStack {
@@ -107,83 +136,82 @@ struct PaywallView: View {
                             .multilineTextAlignment(.center)
                     }
                     .opacity(animateHeader ? 1 : 0)
-                    .offset(y: animateHeader ? 0 : 12)
                     .animation(.easeOut(duration: 0.6), value: animateHeader)
                     
-                    // MARK: - Feature Rows
-                    
                     VStack(alignment: .leading, spacing: 14) {
-                        
                         FeatureRow(icon: "brain.head.profile", text: "Unlimited AI Judgments")
-                            .opacity(showFeature1 ? 1 : 0)
-                            .offset(y: showFeature1 ? 0 : 8)
-                            .animation(.easeOut(duration: 0.5), value: showFeature1)
-                        
                         FeatureRow(icon: "person.2", text: "Turn conflict into healthier communication")
-                            .opacity(showFeature2 ? 1 : 0)
-                            .offset(y: showFeature2 ? 0 : 8)
-                            .animation(.easeOut(duration: 0.5), value: showFeature2)
-                        
-                        FeatureRow(icon: "waveform", text: "Longer audio uploads")
-                            .opacity(showFeature3 ? 1 : 0)
-                            .offset(y: showFeature3 ? 0 : 8)
-                            .animation(.easeOut(duration: 0.5), value: showFeature3)
                     }
                     .frame(maxWidth: 320)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.top, 8)
                     
-                    // MARK: - Pricing Options
-                    
-                    VStack(spacing: 12) {
-                        
-                        SlimPlanRow(
-                            title: "Monthly Plan",
-                            price: "$9.99",
-                            period: "month",
-                            isSelected: selectedPlan == .monthly,
-                            originalPrice: nil,
-                            badgeText: nil
-                        )
-                        .onTapGesture {
-                            lightHaptic.impactOccurred()
-                            selectedPlan = .monthly
+                    if isLoading {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .padding(.top, 20)
+                    } else {
+                        VStack(spacing: 12) {
+                            
+                            if let monthly = monthlyPackage {
+                                SlimPlanRow(
+                                    title: "Monthly Plan",
+                                    price: monthly.storeProduct.localizedPriceString,
+                                    period: "month",
+                                    isSelected: selectedPlan == .monthly,
+                                    originalPrice: nil,
+                                    badgeText: nil
+                                )
+                                .onTapGesture {
+                                    lightHaptic.impactOccurred()
+                                    selectedPlan = .monthly
+                                }
+                            }
+                            
+                            if let yearly = yearlyPackage {
+                                SlimPlanRow(
+                                    title: "Annual Plan",
+                                    price: yearly.storeProduct.localizedPriceString,
+                                    period: "year",
+                                    isSelected: selectedPlan == .yearly,
+                                    originalPrice: calculatedAnnualOriginalPrice,
+                                    badgeText: "30% OFF"
+                                )
+                                .onTapGesture {
+                                    lightHaptic.impactOccurred()
+                                    selectedPlan = .yearly
+                                }
+                            }
                         }
-                        
-                        SlimPlanRow(
-                            title: "Annual Plan",
-                            price: "$79.99",
-                            period: "year",
-                            isSelected: selectedPlan == .yearly,
-                            originalPrice: "$119.88",
-                            badgeText: "30% OFF"
-                        )
-                        .onTapGesture {
-                            lightHaptic.impactOccurred()
-                            selectedPlan = .yearly
-                        }
+                        .padding(.top, 12)
                     }
-                    .padding(.top, 12)
                     
-                    Spacer(minLength: 120)
-                }
-                .padding(.horizontal, DesignSystem.Spacing.screenPadding)
-            }
-            
-            // MARK: - Sticky CTA
-            
-            VStack(spacing: 10) {
-                
-                Button {
-                    lightHaptic.impactOccurred()
-                    // Purchase logic here
-                } label: {
-                    Text(selectedPlan == .monthly
-                         ? "Start Monthly Plan"
-                         : "Start Annual Plan")
-                        .font(DesignSystem.Typography.button)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
+                    VStack(spacing: 14) {
+                        
+                        Text(disclaimerText)
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(DesignSystem.Colors.textSecondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 20)
+                        
+                        Button {
+                            lightHaptic.impactOccurred()
+                            purchaseSelectedPlan()
+                        } label: {
+                            if isPurchasing {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 16)
+                            } else {
+                                Text(selectedPlan == .monthly
+                                     ? "Start Monthly Plan"
+                                     : "Start Annual Plan")
+                                .font(DesignSystem.Typography.button)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                            }
+                        }
                         .background(
                             LinearGradient(
                                 colors: [
@@ -196,43 +224,118 @@ struct PaywallView: View {
                         )
                         .foregroundColor(DesignSystem.Colors.textInverse)
                         .cornerRadius(16)
+                        .disabled(isPurchasing || isLoading)
+                        
+                        HStack(spacing: 20) {
+                            
+                            Button("Restore") {
+                                lightHaptic.impactOccurred()
+                                restorePurchases()
+                            }
+                            
+                            Link("Privacy", destination: URL(string: "https://thirdparty-landing.vercel.app/privacy")!)
+                            Link("Terms", destination: URL(string: "https://thirdparty-landing.vercel.app/tos")!)
+                        }
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(DesignSystem.Colors.textSecondary)
+                    }
+                    .padding(.top, 8)
+                    
+                    Spacer(minLength: 60)
                 }
-                
-                Text("Auto-renews unless cancelled.")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(DesignSystem.Colors.textSecondary)
+                .padding(.horizontal, DesignSystem.Spacing.screenPadding)
             }
-            .padding(.horizontal)
-            .padding(.top, 10)
-            .padding(.bottom, 30)
-            .background(
-                DesignSystem.Colors.bgTertiary
-                    .ignoresSafeArea(edges: .bottom)
-            )
+        }
+        .alert("Purchase Failed", isPresented: $showPurchaseError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(purchaseErrorMessage ?? "Something went wrong. Please try again.")
         }
         .onAppear {
             animateHeader = true
-            
             lightHaptic.prepare()
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                showFeature1 = true
-            }
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                showFeature2 = true
-            }
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                showFeature3 = true
+            fetchOfferings()
+        }
+    }
+    
+    private func purchaseSelectedPlan() {
+        guard let package = selectedPackage else {
+            purchaseErrorMessage = "Plans are still loading. Please try again in a moment."
+            showPurchaseError = true
+            return
+        }
+        
+        isPurchasing = true
+        
+        Task {
+            do {
+                let result = try await Purchases.shared.purchase(package: package)
+                
+                let isPro = result.customerInfo.entitlements["pro"]?.isActive == true
+                
+                await MainActor.run {
+                    isPurchasing = false
+                    if isPro {
+                        onDismiss()
+                    } else {
+                        purchaseErrorMessage = "Purchase completed, but access was not activated. Try restoring purchases."
+                        showPurchaseError = true
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    isPurchasing = false
+                    
+                    if let rcError = error as? RevenueCat.ErrorCode,
+                       rcError == .purchaseCancelledError {
+                        return
+                    }
+                    
+                    purchaseErrorMessage = (error as NSError).localizedDescription
+                    showPurchaseError = true
+                }
             }
         }
     }
+    
+    private func restorePurchases() {
+        isPurchasing = true
+        
+        Task {
+            do {
+                let info = try await Purchases.shared.restorePurchases()
+                let isPro = info.entitlements["pro"]?.isActive == true
+                
+                await MainActor.run {
+                    isPurchasing = false
+                    if isPro {
+                        onDismiss()
+                    } else {
+                        purchaseErrorMessage = "No active subscription found to restore."
+                        showPurchaseError = true
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    isPurchasing = false
+                    purchaseErrorMessage = (error as NSError).localizedDescription
+                    showPurchaseError = true
+                }
+            }
+        }
+    }
+    
+    private func fetchOfferings() {
+        Purchases.shared.getOfferings { offerings, _ in
+            if let current = offerings?.current {
+                self.offerings = offerings
+                self.monthlyPackage = current.monthly
+                self.yearlyPackage = current.annual
+            }
+            self.isLoading = false
+        }
+    }
 }
-
-//
-// MARK: - Slim Plan Row
-//
 
 struct SlimPlanRow: View {
     
@@ -309,10 +412,6 @@ struct SlimPlanRow: View {
         )
     }
 }
-
-//
-// MARK: - Feature Row
-//
 
 struct FeatureRow: View {
     let icon: String

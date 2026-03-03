@@ -331,12 +331,29 @@ private extension ExpandedHistoryView {
     // MARK: Breakdown
     
     var healthBreakdown: some View {
-        VStack(spacing: DesignSystem.Spacing.md) {
-            categoryRow(title: "Respect", value: judgment.respect)
-            categoryRow(title: "Empathy", value: judgment.empathy)
-            categoryRow(title: "Accountability", value: judgment.accountability)
-            categoryRow(title: "Emotional Regulation", value: judgment.emotionalRegulation)
-            categoryRow(title: "Manipulation / Toxicity", value: judgment.manipulationToxicity)
+        
+        VStack(alignment: .leading, spacing: DesignSystem.Spacing.sm) {
+            
+            Text("BREAKDOWN")
+                .font(.system(size: 12, weight: .heavy))
+                .foregroundColor(DesignSystem.Colors.textMuted)
+                .tracking(1.5)
+            
+            VStack(spacing: DesignSystem.Spacing.md) {
+                categoryRow(title: "Respect", value: judgment.respect)
+                categoryRow(title: "Empathy", value: judgment.empathy)
+                categoryRow(title: "Accountability", value: judgment.accountability)
+                categoryRow(title: "Emotional Regulation", value: judgment.emotionalRegulation)
+                categoryRow(title: "Manipulation / Toxicity", value: judgment.manipulationToxicity)
+            }
+            .padding(DesignSystem.Spacing.cardPadding)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(DesignSystem.Colors.bgCard)
+            .overlay(
+                RoundedRectangle(cornerRadius: DesignSystem.Radius.lg)
+                    .stroke(DesignSystem.Colors.border)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.lg))
         }
     }
     

@@ -210,12 +210,29 @@ private extension JudgmentView {
     }
     
     var healthBreakdown: some View {
-        VStack(spacing: DesignSystem.Spacing.md) {
-            categoryRow(title: "Respect", value: judgment.Respect)
-            categoryRow(title: "Empathy", value: judgment.Empathy)
-            categoryRow(title: "Accountability", value: judgment.Accountability)
-            categoryRow(title: "Emotional Regulation", value: judgment.EmotionalRegulation)
-            categoryRow(title: "Manipulation / Toxicity", value: judgment.ManipulationToxicity)
+        
+        VStack(alignment: .leading, spacing: DesignSystem.Spacing.sm) {
+            
+            Text("BREAKDOWN")
+                .font(.system(size: 12, weight: .heavy))
+                .foregroundColor(DesignSystem.Colors.textMuted)
+                .tracking(1.5)
+            
+            VStack(spacing: DesignSystem.Spacing.md) {
+                categoryRow(title: "Respect", value: judgment.Respect)
+                categoryRow(title: "Empathy", value: judgment.Empathy)
+                categoryRow(title: "Accountability", value: judgment.Accountability)
+                categoryRow(title: "Emotional Regulation", value: judgment.EmotionalRegulation)
+                categoryRow(title: "Manipulation / Toxicity", value: judgment.ManipulationToxicity)
+            }
+            .padding(DesignSystem.Spacing.cardPadding)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(DesignSystem.Colors.bgCard)
+            .overlay(
+                RoundedRectangle(cornerRadius: DesignSystem.Radius.lg)
+                    .stroke(DesignSystem.Colors.border)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.lg))
         }
     }
     
@@ -282,40 +299,29 @@ private extension JudgmentView {
     }
     
     var bottomActions: some View {
-        HStack(spacing: DesignSystem.Spacing.md) {
-            
-            Button(action: { lightHaptic() }) {
-                Image(systemName: "camera")
-                    .frame(width: 52, height: 52)
-                    .background(DesignSystem.Colors.bgTertiary)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
-            }
-            
-            Button(action: { lightHaptic() }) {
-                Image(systemName: "square.and.arrow.up")
-                    .frame(width: 52, height: 52)
-                    .background(DesignSystem.Colors.bgTertiary)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
-            }
-            
-            Button(action: {
-                lightHaptic()
-                onDone()
-            }) {
-                Text("Done")
-                    .font(DesignSystem.Typography.button)
-                    .frame(maxWidth: .infinity, minHeight: 52)
-                    .background(
-                        LinearGradient(
-                            colors: [DesignSystem.Colors.primary,
-                                     DesignSystem.Colors.primaryDark],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
+        Button(action: {
+            lightHaptic()
+            onDone()
+        }) {
+            Text("Done")
+                .font(DesignSystem.Typography.button)
+                .frame(maxWidth: .infinity, minHeight: 56)
+                .background(
+                    LinearGradient(
+                        colors: [
+                            DesignSystem.Colors.primary,
+                            DesignSystem.Colors.primaryDark
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
                     )
-                    .foregroundColor(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.button))
-            }
+                )
+                .foregroundColor(.white)
+                .clipShape(
+                    RoundedRectangle(
+                        cornerRadius: DesignSystem.Radius.button
+                    )
+                )
         }
     }
     

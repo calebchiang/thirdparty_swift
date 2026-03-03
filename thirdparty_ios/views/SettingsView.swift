@@ -4,6 +4,14 @@ struct SettingsView: View {
     
     @State private var user: User?
     @EnvironmentObject var auth: AuthViewModel
+    private let privacyURL = URL(string: "https://thirdparty-landing.vercel.app/privacy")!
+    private let termsURL = URL(string: "https://thirdparty-landing.vercel.app/tos")!
+    @State private var showPaywall = false
+    
+    @State private var showDeleteConfirmation = false
+    @State private var isDeletingAccount = false
+    @State private var showDeleteError = false
+    @State private var deleteErrorMessage = ""
     
     var body: some View {
         ZStack {
@@ -98,7 +106,7 @@ struct SettingsView: View {
                                 
                                 if !user.isPremium {
                                     Button {
-                                        // TODO: Navigate to paywall
+                                        showPaywall = true
                                     } label: {
                                         Text("Upgrade")
                                             .font(DesignSystem.Typography.caption)
@@ -129,21 +137,7 @@ struct SettingsView: View {
                             )
                         }
                     }
-                    
-                    // MARK: - PRIVACY
-                    VStack(alignment: .leading, spacing: DesignSystem.Spacing.md) {
-                        
-                        sectionTitle("PRIVACY")
-                        
-                        settingsGroup {
-                            settingsRow(
-                                icon: "brain.head.profile",
-                                label: "AI Data Processing",
-                                value: "Enabled"
-                            )
-                        }
-                    }
-                    
+             
                     // MARK: - SUPPORT
                     VStack(alignment: .leading, spacing: DesignSystem.Spacing.md) {
                         
@@ -153,14 +147,18 @@ struct SettingsView: View {
                             settingsRow(
                                 icon: "key.shield.fill",
                                 label: "Privacy Policy"
-                            )
-                            
+                            ) {
+                                UIApplication.shared.open(privacyURL)
+                            }
+
                             Divider().background(DesignSystem.Colors.border)
-                            
+
                             settingsRow(
                                 icon: "doc.text",
                                 label: "Terms of Service"
-                            )
+                            ) {
+                                UIApplication.shared.open(termsURL)
+                            }
                         }
                     }
                     
@@ -183,7 +181,9 @@ struct SettingsView: View {
                                 icon: "trash",
                                 label: "Delete Account",
                                 isDanger: true
-                            )
+                            ) {
+                                showDeleteConfirmation = true
+                            }
                         }
                     }
                     
@@ -209,6 +209,43 @@ struct SettingsView: View {
                 }
                 .padding(.horizontal, DesignSystem.Spacing.screenPadding)
                 .padding(.bottom, DesignSystem.Spacing.xxl)
+            }
+        }
+        .fullScreenCover(isPresented: $showPaywall) {
+            PaywallView {
+                showPaywall = false
+            }
+        }
+        .alert(
+            "Delete Account?",
+            isPresented: $showDeleteConfirmation
+        ) {
+            Button("Delete Account", role: .destructive) {
+                deleteAccount()
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("This action is permanent and cannot be undone. All your debates, judgments, transcripts, and account data will be permanently deleted.")
+        }
+        .alert(
+            "Deletion Failed",
+            isPresented: $showDeleteError
+        ) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(deleteErrorMessage)
+        }
+        .overlay {
+            if isDeletingAccount {
+                ZStack {
+                    Color.black.opacity(0.4)
+                        .ignoresSafeArea()
+                    
+                    ProgressView("Deleting account...")
+                        .padding()
+                        .background(DesignSystem.Colors.bgCard)
+                        .cornerRadius(12)
+                }
             }
         }
         .onAppear {
@@ -300,4 +337,32 @@ struct SettingsView: View {
             }
         }
     }
+    
+    private func deleteAccount() {
+        isDeletingAccount = true
+        
+        RequestManager.shared.sendRequest(
+            endpoint: "/users/me",
+            method: "DELETE",
+            responseType: DeleteResponse.self
+        ) { result in
+            switch result {
+            case .success:
+                isDeletingAccount = false
+                
+                // Log user out immediately
+                auth.logout()
+                
+            case .failure(let error):
+                isDeletingAccount = false
+                deleteErrorMessage = "Something went wrong. Please try again."
+                print("Delete error:", error)
+                showDeleteError = true
+            }
+        }
+    }
+}
+
+struct DeleteResponse: Decodable {
+    let message: String
 }

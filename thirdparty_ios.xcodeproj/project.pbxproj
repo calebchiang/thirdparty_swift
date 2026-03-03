@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0016682E2F4CDCBE005A3D41 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 0016682D2F4CDCBE005A3D41 /* KeychainAccess */; };
+		001CE5592F5381F500A565E7 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = 001CE5582F5381F500A565E7 /* RevenueCat */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +57,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				001CE5592F5381F500A565E7 /* RevenueCat in Frameworks */,
 				0016682E2F4CDCBE005A3D41 /* KeychainAccess in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -118,6 +120,7 @@
 			name = thirdparty_ios;
 			packageProductDependencies = (
 				0016682D2F4CDCBE005A3D41 /* KeychainAccess */,
+				001CE5582F5381F500A565E7 /* RevenueCat */,
 			);
 			productName = thirdparty_ios;
 			productReference = 001667FF2F4CDBB2005A3D41 /* thirdparty_ios.app */;
@@ -203,6 +206,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				0016682C2F4CDCBE005A3D41 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
+				001CE5572F5381F500A565E7 /* XCRemoteSwiftPackageReference "purchases-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 001668002F4CDBB2005A3D41 /* Products */;
@@ -605,6 +609,14 @@
 				kind = branch;
 			};
 		};
+		001CE5572F5381F500A565E7 /* XCRemoteSwiftPackageReference "purchases-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RevenueCat/purchases-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.60.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -612,6 +624,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 0016682C2F4CDCBE005A3D41 /* XCRemoteSwiftPackageReference "KeychainAccess" */;
 			productName = KeychainAccess;
+		};
+		001CE5582F5381F500A565E7 /* RevenueCat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 001CE5572F5381F500A565E7 /* XCRemoteSwiftPackageReference "purchases-ios" */;
+			productName = RevenueCat;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
