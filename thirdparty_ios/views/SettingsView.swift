@@ -6,6 +6,7 @@ struct SettingsView: View {
     @EnvironmentObject var auth: AuthViewModel
     private let privacyURL = URL(string: "https://thirdparty-landing.vercel.app/privacy")!
     private let termsURL = URL(string: "https://thirdparty-landing.vercel.app/tos")!
+    private let manageSubscriptionURL = URL(string: "https://apps.apple.com/account/subscriptions")!
     @State private var showPaywall = false
     
     @State private var showDeleteConfirmation = false
@@ -87,13 +88,27 @@ struct SettingsView: View {
                                         .foregroundColor(DesignSystem.Colors.textPrimary)
                                     
                                     if user.isPremium {
-                                        HStack(spacing: 4) {
-                                            Image(systemName: "star.fill")
-                                                .font(.system(size: 12))
-                                                .foregroundColor(DesignSystem.Colors.primary)
-                                            Text("Premium")
-                                                .font(DesignSystem.Typography.caption)
-                                                .foregroundColor(DesignSystem.Colors.primary)
+                                        VStack(alignment: .leading, spacing: 6) {
+                                            
+                                            HStack(spacing: 4) {
+                                                Image(systemName: "star.fill")
+                                                    .font(.system(size: 12))
+                                                    .foregroundColor(DesignSystem.Colors.primary)
+                                                
+                                                Text("Premium")
+                                                    .font(DesignSystem.Typography.caption)
+                                                    .foregroundColor(DesignSystem.Colors.primary)
+                                            }
+                                            
+                                            Button {
+                                                UIApplication.shared.open(manageSubscriptionURL)
+                                            } label: {
+                                                Text("Manage Subscription")
+                                                    .font(.system(size: 12, weight: .medium))
+                                                    .foregroundColor(DesignSystem.Colors.textSecondary)
+                                                    .underline()
+                                            }
+                                            .buttonStyle(.plain)
                                         }
                                     } else {
                                         Text("Free Plan")

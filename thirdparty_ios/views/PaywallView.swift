@@ -271,7 +271,7 @@ struct PaywallView: View {
             do {
                 let result = try await Purchases.shared.purchase(package: package)
                 
-                let isPro = result.customerInfo.entitlements["pro"]?.isActive == true
+                let isPro = result.customerInfo.entitlements["ThirdParty Pro"]?.isActive == true
                 
                 await MainActor.run {
                     isPurchasing = false
