@@ -235,8 +235,15 @@ private extension ScreenshotProcessingView {
                 judgment = argument.judgment
                 checkIfReady()
                 
-            case .failure:
-                errorMessage = "Failed to analyze conversation."
+            case .failure(let error):
+
+                let message = error.localizedDescription.lowercased()
+
+                if message.contains("credit") {
+                    errorMessage = "You don't have enough credits to generate a verdict."
+                } else {
+                    errorMessage = "Failed to analyze conversation."
+                }
             }
         }
     }
@@ -251,15 +258,48 @@ private extension ScreenshotProcessingView {
     
     func errorView(message: String) -> some View {
         VStack(spacing: 20) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 40))
-                .foregroundColor(DesignSystem.Colors.error)
+            
+            ZStack {
+                Circle()
+                    .fill(DesignSystem.Colors.error.opacity(0.15))
+                    .frame(width: 100, height: 100)
+                
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.system(size: 40))
+                    .foregroundColor(DesignSystem.Colors.error)
+            }
             
             Text("Something went wrong")
                 .font(DesignSystem.Typography.h2)
+                .foregroundColor(DesignSystem.Colors.textPrimary)
             
             Text(message)
+                .font(DesignSystem.Typography.body)
+                .foregroundColor(DesignSystem.Colors.textSecondary)
                 .multilineTextAlignment(.center)
+                .padding(.horizontal, 30)
+            
+            Button {
+                onFlowComplete()
+            } label: {
+                Text("Go Back")
+                    .font(DesignSystem.Typography.body)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: 200)
+                    .padding(.vertical, 12)
+                    .background(
+                        LinearGradient(
+                            colors: [
+                                DesignSystem.Colors.primary,
+                                DesignSystem.Colors.primaryDark
+                            ],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(12)
+            }
+            .padding(.top, 10)
         }
     }
 }

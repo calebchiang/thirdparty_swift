@@ -71,7 +71,7 @@ struct HomeView: View {
                             icon: "mic.fill"
                         ) {
                             lightHaptic()
-                            selectedMode = .live
+                            attemptMode(.live)
                         }
                         .opacity(showLive ? 1 : 0)
                         .offset(y: showLive ? 0 : 30)
@@ -84,7 +84,7 @@ struct HomeView: View {
                             icon: "waveform"
                         ) {
                             lightHaptic()
-                            selectedMode = .upload
+                            attemptMode(.upload)
                         }
                         .opacity(showUpload ? 1 : 0)
                         .offset(y: showUpload ? 0 : 30)
@@ -97,7 +97,7 @@ struct HomeView: View {
                             icon: "photo.fill"
                         ) {
                             lightHaptic()
-                            selectedMode = .screenshot
+                            attemptMode(.screenshot)
                         }
                         .opacity(showScreenshot ? 1 : 0)
                         .offset(y: showScreenshot ? 0 : 30)
@@ -108,8 +108,6 @@ struct HomeView: View {
                         HStack {
                             
                             Button {
-                                lightHaptic()
-                                showCreditsAlert = true
                             } label: {
                                 HStack(spacing: 6) {
                                     Image(systemName: "bolt.fill")
@@ -183,17 +181,19 @@ struct HomeView: View {
             }
         }
         .alert(
-            "Credits",
+            "Out of Credits",
             isPresented: $showCreditsAlert
         ) {
-            Button("Get more credits") {
+            Button("Get More Credits") {
                 showCreditsAlert = false
+                showPaywall = true
             }
+            
             Button("Cancel", role: .cancel) {
                 showCreditsAlert = false
             }
         } message: {
-            Text("You have \(user?.credits ?? 0) remaining.")
+            Text("You've used all your credits. Upgrade to continue generating verdicts.")
         }
         .onAppear {
             fetchUserProfile()
@@ -224,6 +224,18 @@ struct HomeView: View {
                 print("Failed to fetch user:", error)
             }
         }
+    }
+    
+    private func attemptMode(_ mode: SetupMode) {
+        
+        guard let user = user else { return }
+        
+        if user.credits <= 0 && !user.isPremium {
+            showCreditsAlert = true
+            return
+        }
+        
+        selectedMode = mode
     }
 }
 

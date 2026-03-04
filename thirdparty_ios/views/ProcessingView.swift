@@ -211,6 +211,28 @@ private extension ProcessingView {
                 .foregroundColor(DesignSystem.Colors.textSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 30)
+            
+            Button {
+                onFlowComplete()
+            } label: {
+                Text("Go Back")
+                    .font(DesignSystem.Typography.body)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: 200)
+                    .padding(.vertical, 12)
+                    .background(
+                        LinearGradient(
+                            colors: [
+                                DesignSystem.Colors.primary,
+                                DesignSystem.Colors.primaryDark
+                            ],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(12)
+            }
+            .padding(.top, 10)
         }
     }
 }
@@ -246,8 +268,15 @@ private extension ProcessingView {
                 argumentId = argument.id
                 startPolling()
                 
-            case .failure:
-                errorMessage = "Failed to analyze conversation."
+            case .failure(let error):
+                
+                let message = error.localizedDescription.lowercased()
+                
+                if message.contains("credit") {
+                    errorMessage = "You don't have enough credits to generate a verdict."
+                } else {
+                    errorMessage = "Failed to analyze conversation."
+                }
             }
         }
     }
